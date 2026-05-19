@@ -1,0 +1,1050 @@
+{
+	"info": {
+		"_postman_id": "dba8a819-2b03-4e8c-91cf-96eb15a7909f",
+		"name": "Backend - Procurement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "23362118"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"admin@procurement.app\",\r\n    \"password\":\"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Azzasafah Procurement\",\r\n  \"email\": \"azzasafah@procurement.app\",\r\n  \"password\": \"password123\",\r\n  \"password_confirmation\": \"password123\",\r\n  \"department_id\": \"019e1304-e3c3-731d-b5c2-2a2c1be46252\",\r\n  \"phone\": \"081234567890\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout ( Protected )",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/auth/logout"
+					},
+					"response": []
+				},
+				{
+					"name": "me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/auth/me"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Smoke Test",
+			"item": [
+				{
+					"name": "Health",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/health"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/users/019e1304-e6f0-70c3-9697-0a72f84688f1"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"John Doe\",\r\n    \"email\": \"john@example.com\",\r\n    \"password\": \"password123\",\r\n    \"department_id\": \"019e1304-e3c8-7270-afc8-88d9c648283d\",\r\n    \"role\": \"employee\",\r\n    \"phone\": \"081234567890\",\r\n    \"is_active\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/users/"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"John Updated\",\r\n    \"email\": \"johnupdated@example.com\",\r\n    \"phone\": \"089999999999\",\r\n    \"role\": \"manager\",\r\n    \"is_active\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/users/019e311f-ca23-7399-910b-39db897ec0c2"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"manager\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/users/019e1304-e6f0-70c3-9697-0a72f84688f1/role"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{baseUrl}}/api/v1/users/019e311f-ca23-7399-910b-39db897ec0c2"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Department",
+			"item": [
+				{
+					"name": "Get All Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/departments/"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Department By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/departments/019e31b3-3a95-71c4-956a-522d0ceaa7bd"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Research and Development\",\r\n    \"code\": \"RND\",\r\n    \"description\": \"Departemen Research and Development\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/departments"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Research and Innovation updated\",\r\n    \"code\": \"RNI updated\",\r\n    \"description\": \"Departemen Research dan Innovation\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/departments/019e31b3-3a95-71c4-956a-522d0ceaa7bd"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{baseUrl}}/api/v1/departments/019e31b3-3a95-71c4-956a-522d0ceaa7bd"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Report",
+			"item": [
+				{
+					"name": "Get Summary",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/reports/summary"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top Department",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/reports/category-per-month"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Per Month",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/reports/average-lead-time"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Lead Time",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/reports/average-lead-time"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vendor",
+			"item": [
+				{
+					"name": "Get All Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/vendors"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vendor By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/vendors/019e3fa1-677e-7123-ba7b-c1d6e62b516d"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"PT Sumber Teknologi Nusantara\",\r\n    \"code\": \"STN-001\",\r\n    \"contact_person\": \"Andi Pratama\",\r\n    \"email\": \"vendor@stn.co.id\",\r\n    \"phone\": \"081234567890\",\r\n    \"address\": \"Jl. Industri Raya No. 88, Surabaya\",\r\n    \"category\": \"Electronics\",\r\n    \"is_active\": true,\r\n    \"notes\": \"Vendor pengadaan perangkat IT dan operasional kantor\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/vendors/"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"PT Sumber Teknologi Nusantara updated\",\r\n    \"code\": \"STN-001\",\r\n    \"contact_person\": \"Andi Pratama\",\r\n    \"email\": \"vendor@stn.co.id\",\r\n    \"phone\": \"081234567890\",\r\n    \"address\": \"Jl. Industri Raya No. 88, Surabaya\",\r\n    \"category\": \"Electronics\",\r\n    \"is_active\": true,\r\n    \"notes\": \"Vendor pengadaan perangkat IT dan operasional kantor\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/vendors/019e3fa1-677e-7123-ba7b-c1d6e62b516d"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete vendor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{baseUrl}}/api/v1/vendors/019e3fa1-677e-7123-ba7b-c1d6e62b516d"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stock",
+			"item": [
+				{
+					"name": "Get All Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/stocks"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stock By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/stocks/019e1304-e7bf-73cd-a9e8-974fe0dbe41c"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Warehouse}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"item_name\": \"Laptop ASUS ExpertBook\",\r\n    \"category\": \"Electronics\",\r\n    \"quantity\": 25,\r\n    \"unit\": \"pcs\",\r\n    \"location\": \"Warehouse A - Rack 3\",\r\n    \"minimum_stock\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/stocks/"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Warehouse}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"item_name\": \"Laptop Lenovo ThinkPad Gen 5\",\r\n    \"category\": \"Electronics\",\r\n    \"quantity\": 18,\r\n    \"unit\": \"pcs\",\r\n    \"location\": \"Warehouse B - Rack 2\",\r\n    \"minimum_stock\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/stocks/019e3fb2-0d3d-7067-a4ec-4fb440a453b0"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Stock",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Warehouse}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"item_name\": \"Laptop Lenovo ThinkPad Gen 5\",\r\n    \"quantity\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/stocks/check"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Request",
+			"item": [
+				{
+					"name": "Get All Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/requests"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"notes\": \"Pengadaan perangkat dan kebutuhan operasional untuk tim finansial\",\r\n    \"items\": [\r\n        {\r\n            \"item_name\": \"Laptop ASUS ExpertBook\",\r\n            \"category\": \"Electronics\",\r\n            \"quantity\": 4,\r\n            \"unit\": \"pcs\",\r\n            \"estimated_price\": 12500000,\r\n            \"notes\": \"Untuk staff finance dan accounting\"\r\n        },\r\n        {\r\n            \"item_name\": \"Printer Epson EcoTank L5290\",\r\n            \"category\": \"Office Equipment\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"estimated_price\": 4500000,\r\n            \"notes\": \"Untuk cetak invoice dan laporan keuangan\"\r\n        },\r\n        {\r\n            \"item_name\": \"Calculator Casio MX-12B\",\r\n            \"category\": \"Office Supplies\",\r\n            \"quantity\": 6,\r\n            \"unit\": \"pcs\",\r\n            \"estimated_price\": 250000,\r\n            \"notes\": \"Kebutuhan perhitungan operasional finance\"\r\n        },\r\n        {\r\n            \"item_name\": \"Filling Cabinet\",\r\n            \"category\": \"Furniture\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"estimated_price\": 2800000,\r\n            \"notes\": \"Penyimpanan dokumen keuangan\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"notes\": \"Pengadaan perangkat dan kebutuhan operasional untuk tim finansial Updated\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3670-6e53-70ec-a5e3-26a7cd8d8d42"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Submit Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3f60-628f-7061-a95f-fcd2757057eb"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Approve Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3f60-628f-7061-a95f-fcd2757057eb/approve"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Reject Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{Manager}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3701-9093-716f-a2ef-2878461be70a/reject"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Procure Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"vendor_id\": \"019e1304-e7ba-73a2-820d-693700020831\",\r\n    \"expected_delivery_date\": \"2026-05-25\",\r\n    \"total_amount\": 62300000,\r\n    \"notes\": \"Pengadaan perangkat operasional untuk tim finansial dan accounting\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3f60-628f-7061-a95f-fcd2757057eb/procure"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Complete Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"vendor_id\": \"019e1304-e7ba-73a2-820d-693700020831\",\r\n    \"expected_delivery_date\": \"2026-05-25\",\r\n    \"total_amount\": 62300000,\r\n    \"notes\": \"Pengadaan perangkat operasional untuk tim finansial dan accounting\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3670-6e53-70ec-a5e3-26a7cd8d8d42/complete"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{admin}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{baseUrl}}/api/v1/requests/019e3715-f40c-7239-a787-26800643fb0b"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "Get All Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "{{baseUrl}}/api/v1/procures/"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Complete Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{purchasing}}"
+							}
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"vendor_id\": \"019e1304-e7ba-73a2-820d-693700020831\",\r\n    \"expected_delivery_date\": \"2026-05-25\",\r\n    \"total_amount\": 62300000,\r\n    \"notes\": \"Pengadaan perangkat operasional untuk tim finansial dan accounting\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/procures/019e3f61-6066-72dd-849d-0ecfcc5b8dc2/deliver"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": ""
+		},
+		{
+			"key": "Token",
+			"value": ""
+		},
+		{
+			"key": "Employee",
+			"value": ""
+		},
+		{
+			"key": "Manager",
+			"value": ""
+		},
+		{
+			"key": "Warehouse",
+			"value": ""
+		},
+		{
+			"key": "purchasing",
+			"value": ""
+		},
+		{
+			"key": "admin",
+			"value": ""
+		}
+	]
+}
