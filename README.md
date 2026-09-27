@@ -1,446 +1,507 @@
-# 🛒 Procurement Management API
+# 🏢 Enterprise Procurement Management API
 
-A robust **REST API** for managing company procurement workflows — built with **Laravel 12** using a **Service Layer architecture**, featuring role-based access control, multi-stage approval flows, vendor management, stock tracking, and analytical reporting.
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
+[![Sanctum](https://img.shields.io/badge/Auth-Laravel%20Sanctum-red?style=for-the-badge&logo=laravel)](https://laravel.com/docs/sanctum)
+[![Architecture](https://img.shields.io/badge/Architecture-Service%20Layer%20%7C%20FSM-informational?style=for-the-badge)](https://en.wikipedia.org/wiki/Finite-state_machine)
+[![Audit Compliance](https://img.shields.io/badge/Audit-Immutable%20Log%20%7C%20ISO%2027001-success?style=for-the-badge)](#-immutable-audit-trail--compliance)
 
-> 📌 Built as a personal portfolio project by [Muhammad Hafizh Azzasafah]
-
----
-
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Running the Application](#-running-the-application)
-- [API Documentation](#-api-documentation)
-  - [Authentication](#authentication)
-  - [Users](#users)
-  - [Departments](#departments)
-  - [Vendors](#vendors)
-  - [Stocks](#stocks)
-  - [Procurement Requests](#procurement-requests)
-  - [Orders (Procures)](#orders-procures)
-  - [Reports](#reports)
-- [Role & Access Control](#-role--access-control)
-- [Procurement Flow](#-procurement-flow)
-- [Author](#-author)
+> **Enterprise-Grade RESTful API** untuk otomasi tata kelola pengadaan barang/jasa (*End-to-End Procurement Lifecycle*), dirancang dengan standar keandalan tinggi, *Segregation of Duties (SoD)*, *Finite State Machine (FSM)*, *Pessimistic Locking* untuk pencegahan *race condition*, serta *Audit Trail* yang *immutable*.
 
 ---
 
-## ✨ Features
+## 📌 Executive Summary
 
-- 🔐 **JWT-based Authentication** — Secure login, register, logout & token refresh
-- 👥 **User & Role Management** — Admin and employee roles with granular access
-- 🏢 **Department Management** — Organize users by department
-- 🏭 **Vendor Management** — Maintain approved supplier/vendor list
-- 📦 **Stock Management** — Track item inventory with minimum stock threshold alerts
-- 📝 **Procurement Request** — Multi-item request creation with full approval lifecycle
-- ✅ **Multi-Stage Approval Flow** — Draft → Submitted → Approved/Rejected → Procured → Completed
-- 📊 **Analytics & Reporting** — Summary dashboard, category-per-month, average lead time
-- ⚡ **Optimized Queries** — Efficient database queries to support complex multi-stage workflows
-- 🧱 **Clean Code & Service Layer** — Maintainable, testable, and scalable architecture
+Dalam ekosistem korporasi skala besar, BUMN, dan BUMD, proses pengadaan barang dan jasa (*procurement*) merupakan lini operasi krusial yang menuntut **transparansi mutlak, akuntabilitas audit, pencegahan fraud, dan efisiensi anggaran**.
 
----
-
-## 🛠 Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | PHP 8.2+ |
-| Framework | Laravel 12 |
-| Database | MySQL 8.0+ |
-| Authentication | Laravel Sanctum (Bearer Token) |
-| Architecture | Service Layer Pattern (MVC + Services) |
-| API Style | RESTful API |
-| ID Strategy | ULID (Universally Unique Lexicographically Sortable Identifier) |
-| API Testing | Postman |
+Repository ini menyajikan solusi backend modern yang mengabstraksi seluruh siklus pengadaan:
+1. **Perencanaan Kebutuhan (Requisition)** oleh unit kerja/divisi.
+2. **Pemeriksaan Stok Real-time (Warehouse Inventory Check)** dengan mekanisme *concurrency lock*.
+3. **Persetujuan Bertingkat (Multi-Stage Approval Hierarchy)** oleh manajemen.
+4. **Penerbitan Kontrak / Purchase Order (PO)** ke mitra rekanan (*vendor*).
+5. **Penerimaan Logistik & Verifikasi (Delivery & Fulfillment)**.
+6. **Pelaporan Eksekutif & Analisis Lead Time (Business Intelligence)**.
 
 ---
 
-## 🏗 Architecture
+## 🎯 Relevansi & Penerapan pada Target Rekrutmen
+
+Aplikasi ini dibangun dengan spesifikasi teknis dan standar *Good Corporate Governance (GCG)* yang secara langsung menjawab kebutuhan spesifik institusi target:
+
+| Institusi Target | Kebutuhan Strategis Organisasi | Fitur & Implementasi Teknis dalam Sistem Ini |
+|---|---|---|
+| **AirNav Indonesia** *(LPPNPI - BUMN Navigasi Penerbangan)* | Operasi navigasi udara menuntut keandalan 99.99% dan *zero-tolerance* terhadap *fraud* atau malfungsi pengadaan suku cadang radar, CNS/ATM, dan perangkat keselamatan. Dibutuhkan audit kepatuhan regulasi ketat (SPIP/BPK). | • **Immutable Audit Logging**: Setiap transisi status mencatat aktor, timestamp presisi, alamat IP, dan User-Agent tanpa kemampuan manipulasi.<br>• **Strict Finite State Machine**: Mencegah *bypass* alur persetujuan teknis dan manajerial.<br>• **Penomoran Unik Otomatis**: Seri `REQ-YYYYMMDD-XXXX` dan `PO-YYYYMMDD-XXXX` terstandar kronologis. |
+| **Telkomsigma** *(PT Sigma Cipta Caraka - Telkom Group)* | Penyedia solusi IT enterprise, managed services, dan data center. Menuntut arsitektur *clean code*, skalabilitas tinggi, integritas data transaksi konkuren tinggi, serta API berstandar internasional. | • **Service Layer Architecture**: Pemisahan tegas antara HTTP Transport, Form Validation, Business Domain, dan Eloquent Persistence.<br>• **Pessimistic Concurrency Control**: Penerapan `SELECT ... FOR UPDATE` dan transaksi atomik `DB::transaction` pada mutasi stok barang inventaris.<br>• **UUIDv4 / ULID Key Strategy**: Mencegah risiko *ID enumeration attack* dan memudahkan integrasi *distributed systems*.<br>• **Optimized Analytical SQL**: Kueri agregasi SQL performa tinggi untuk metrik KPI tanpa membebani runtime server. |
+| **Perum Tirta Tangerang** *(Perumdam TKR / Perumda TB)* | Badan Usaha Milik Daerah sektor air bersih yang membutuhkan tata kelola transparan untuk pengadaan pipa, meteran air, bahan kimia *water treatment*, dan alat elektro-mekanikal di seluruh cabang pelayanan. | • **Inventory & Stock Thresholds**: Monitoring kuantitas stok gudang dengan *minimum stock alert* untuk mencegah kekosongan material kritis distribusi air.<br>• **Vendor Categorization & Tracking**: Katalog rekanan resmi terverifikasi dengan evaluasi riwayat PO.<br>• **SLA Lead Time Analytics**: Menghitung rata-rata waktu proses dari pengajuan hingga barang tiba di gudang untuk perbaikan layanan publik. |
+
+---
+
+## 🏗 Enterprise Architecture & Design Patterns
+
+Aplikasi mengadopsi prinsip **Clean Architecture** dan **Domain Separation** berbasis Service Layer:
 
 ```
 procurement-api/
 ├── app/
+│   ├── Exceptions/
+│   │   └── BussinessException.php      # Domain Exception untuk pelanggaran aturan bisnis (HTTP 422)
+│   ├── Helpers/
+│   │   ├── GeneratePoNumber.php        # Generator nomor PO terurut otomatis (PO-YYYYMMDD-XXXX)
+│   │   ├── GenerateReqNumber.php       # Generator nomor Request terurut otomatis (REQ-YYYYMMDD-XXXX)
+│   │   └── ResponseFormatter.php       # Standarisasi JSON envelope (meta: code, status, message; result)
 │   ├── Http/
-│   │   ├── Controllers/        # Request handling & response formatting
+│   │   ├── Controllers/API/            # Transport Layer (Handling HTTP Request, delegasi ke Service)
 │   │   │   ├── AuthController.php
-│   │   │   ├── UserController.php
 │   │   │   ├── DepartmentController.php
-│   │   │   ├── VendorController.php
+│   │   │   ├── ProcurementController.php
+│   │   │   ├── ReportController.php
+│   │   │   ├── RequestController.php
 │   │   │   ├── StockController.php
-│   │   │   ├── ProcurementRequestController.php
-│   │   │   ├── ProcureController.php
-│   │   │   └── ReportController.php
-│   │   ├── Middleware/         # Auth & role guard middleware
-│   │   └── Requests/           # Form request validation
-│   ├── Services/               # Business logic layer
-│   │   ├── AuthService.php
-│   │   ├── UserService.php
-│   │   ├── DepartmentService.php
-│   │   ├── VendorService.php
-│   │   ├── StockService.php
-│   │   ├── ProcurementRequestService.php
-│   │   └── ReportService.php
-│   ├── Models/                 # Eloquent models
-│   └── Exceptions/             # Custom business exception handling
+│   │   │   ├── UserController.php
+│   │   │   └── VendorController.php
+│   │   ├── Middleware/
+│   │   │   └── RoleMiddleware.php      # Granular Role-Based Access Guard
+│   │   └── Requests/                   # Validation Layer (Type casting & custom validation rules)
+│   ├── Models/                         # Data Layer (Eloquent ORM, FSM definition, UUID, SoftDeletes)
+│   │   ├── Approval.php
+│   │   ├── Department.php
+│   │   ├── ProcurementOrder.php
+│   │   ├── ProcurementRequest.php
+│   │   ├── RequestItem.php
+│   │   ├── StatusHistory.php           # Immutable Audit Model (delete & update di-override exception)
+│   │   ├── Stock.php
+│   │   ├── User.php
+│   │   └── Vendor.php
+│   └── Services/                       # Business Logic Layer (Transaksi database, State validation)
+│       ├── AuthService.php
+│       ├── ProcureService.php
+│       ├── ReportService.php
+│       ├── RequestService.php
+│       └── StockService.php
 ├── database/
-│   ├── migrations/             # Database schema definitions
-│   └── seeders/                # Initial data seeders
-├── routes/
-│   └── api.php                 # All API route definitions
-└── ...
+│   ├── migrations/                     # DDL Skema Relasional, Foreign Key Constraints & Multi-column Indexing
+│   └── seeders/                        # Seed data multi-divisi dan multi-role untuk simulasi instan
+└── routes/
+    └── api.php                         # Routing API v1 dengan pengelompokan middleware Sanctum & Role
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🔄 Alur Bisnis & Finite State Machine (FSM)
 
-### Prerequisites
+Sistem pengadaan menerapkan **State Machine** deterministik untuk menjamin tidak ada satupun pesanan yang melompati tahapan audit.
 
-- PHP >= 8.2
-- Composer
-- MySQL 8.0+
-- Git
+### 1. Diagram Transisi Status Pengadaan (Procurement Request FSM)
 
-### Installation
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT : Employee Create Request
+    DRAFT --> SUBMITTED : Employee Submit Request
+    DRAFT --> DELETED : Soft Delete (Pembuat / Admin)
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/Azzasafah/procurement-api.git
-cd procurement-api
+    SUBMITTED --> APPROVED : Manager / Admin Approve
+    SUBMITTED --> REJECTED : Manager / Admin Reject (Notes Wajib)
 
-# 2. Install dependencies
-composer install
+    APPROVED --> IN_PROCUREMENT : Purchasing / Admin Assign Vendor & PO
+    APPROVED --> COMPLETED : Direct In-Stock Fulfillment
 
-# 3. Copy environment file
-cp .env.example .env
+    IN_PROCUREMENT --> COMPLETED : PO Delivered & Warehouse Verified
 
-# 4. Generate application key
-php artisan key:generate
+    REJECTED --> [*]
+    COMPLETED --> [*]
+    DELETED --> [*]
+```
 
-# 5. Configure your database in .env (see section below)
+### 2. Diagram Urutan Proses Antar-Aktor (Sequence Flow)
 
-# 6. Run database migrations
-php artisan migrate
+```mermaid
+sequenceDiagram
+    autonumber
+    actor EMP as Staff / Requester (Employee)
+    actor MGR as Kepala Divisi (Manager)
+    actor PUR as Tim Pengadaan (Purchasing)
+    actor WRH as Logistik / Gudang (Warehouse)
+    participant API as Procurement Engine (API / Services)
+    participant DB as Relational DB & Audit Log
 
-# 7. Seed initial data (admin user, sample departments, etc.)
-php artisan db:seed
+    EMP->>API: POST /api/v1/requests (Draft item & estimasi)
+    API->>DB: Insert requests & request_items (Status: DRAFT)
+    API-->>EMP: Request Created (REQ-YYYYMMDD-0001)
+
+    EMP->>API: PUT /api/v1/requests/{id}/submit
+    API->>DB: Update Status SUBMITTED + Record StatusHistory
+    API-->>EMP: Request Submitted for Review
+
+    MGR->>API: PUT /api/v1/requests/{id}/approve
+    API->>DB: Insert Approval record + Status APPROVED + Audit Log
+    API-->>MGR: Request Approved
+
+    PUR->>API: PUT /api/v1/requests/{id}/procure (Vendor, Total, Delivery Date)
+    API->>DB: Create ProcurementOrder (PO-YYYYMMDD-0001) + Status IN_PROCUREMENT
+    API-->>PUR: PO Issued to Vendor
+
+    WRH->>API: POST /api/v1/stocks/check (Pessimistic Lock & Verification)
+    API->>DB: Lock row FOR UPDATE, check & deduct inventory
+    
+    PUR->>API: PUT /api/v1/procures/{id}/deliver
+    API->>DB: Update PO DELIVERED & Request COMPLETED + Audit Log
+    API-->>PUR: Delivery Recorded & Closed
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## 🔐 Matriks Hak Akses & Peran (Role-Based Access Control)
 
-Key variables to configure in your `.env` file:
+Sistem membagi operasional menjadi **5 peran spesifik** demi menegakkan prinsip *Segregation of Duties (SoD)*:
 
-```env
-APP_NAME=ProcurementAPI
-APP_ENV=local
-APP_KEY=base64:...
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=procurement_db
-DB_USERNAME=root
-DB_PASSWORD=
-
-SANCTUM_STATEFUL_DOMAINS=localhost
-```
+| Modul & Fungsionalitas | `employee` | `manager` | `purchasing` | `warehouse` | `admin` |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Autentikasi & Profile (`/auth/*`)** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Buat & Edit Draft Request Sendiri** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Submit Request Milik Sendiri** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Melihat Daftar Pengadaan (Scope Filter)** | Milik Sendiri | Semua Divisi | Semua Divisi | Semua Divisi | Semua Divisi |
+| **Approve / Reject Permohonan Pengadaan** | ❌ | ✅ | ❌ | ❌ | ✅ |
+| **Penerbitan PO & Assign Vendor (`procure`)** | ❌ | ❌ | ✅ | ❌ | ✅ |
+| **Penyelesaian PO (`deliver` & `complete`)** | ❌ | ❌ | ✅ | ❌ | ✅ |
+| **Cek Ketersediaan Stok (`lockForUpdate`)** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Input / Update Master Stok Gudang** | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Kelola Master Vendor & Rekanan** | ❌ | ❌ | ✅ | ❌ | ✅ |
+| **Kelola Master Departemen & Pengguna** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Akses Laporan Analitik & KPI Dashboard** | ❌ | ✅ | ❌ | ❌ | ✅ |
 
 ---
 
-## ▶️ Running the Application
+## 🛡️ Keunggulan Rekayasa Perangkat Lunak (Engineering Highlights)
 
-```bash
-# Start the development server
-php artisan serve
+### 1. 📜 Immutable Audit Trail & Regulatory Compliance
+Setiap perubahan status tersimpan di tabel `status_histories`. Model `StatusHistory` menerapkan proteksi ketat pada tingkat kode:
+* Timestamp transaksi tersimpan otomatis (*append-only*).
+* Menangkap `request_id`, `changed_by`, `from_status`, `to_status`, `notes`, serta jejak digital jaringan: `ip_address` dan `user_agent`.
+* Metode `delete()` dan `update()` pada model sengaja di-*override* untuk **melempar exception**, memastikan bukti audit tidak dapat dimanipulasi (*anti-tampering*).
 
-# The API will be available at:
-# http://localhost:8000
+### 2. ⚡ Penanganan Konkurensi & Race Condition (*Pessimistic Locking*)
+Ketika banyak operator gudang memeriksa atau mengambil alokasi stok material berbarengan, sistem mengisolasi record menggunakan `lockForUpdate()` di dalam transaksi atomik:
+```php
+DB::transaction(function () use ($itemName, $requiredQty) {
+    $stock = Stock::where('item_name', 'like', '%' . $itemName . '%')
+        ->lockForUpdate() // SELECT ... FOR UPDATE (Mencegah double-allocation)
+        ->first();
+
+    if ($stock && $stock->isAvailable($requiredQty)) {
+        $stock->decrement('quantity', $requiredQty);
+    }
+    // ...
+});
 ```
+
+### 3. 🔑 Proteksi Enumerasi Identitas (UUIDv4)
+Seluruh tabel transaksi dan master menggunakan *Universally Unique Identifier* (UUIDv4 / 36-karakter string), menghilangkan kerentanan *ID Enumeration* / *Insecure Direct Object References (IDOR)* yang sering ditemukan pada ID integer incremental biasa.
+
+### 4. 📊 Kueri Analitik & Business Intelligence
+Sistem menyediakan endpoint intelijen bisnis yang dioptimasi pada level basis data:
+* **`averageLeadTime`**: Menghitung rata-rata, waktu tercepat, dan waktu terlama proses pengadaan dari status `SUBMITTED` hingga `COMPLETED` menggunakan subkueri `TIMESTAMPDIFF(DAY, ...)`.
+* **`categoryPerMonth`**: Agregasi tren belanja per kategori barang bulanan (`DATE_FORMAT`).
+* **`topDepartments`**: Menampilkan 5 departemen paling aktif mengajukan permohonan dalam 3 bulan terakhir (`DATE_SUB(NOW(), INTERVAL 3 MONTH)`).
 
 ---
 
-## 📖 API Documentation
+## 📚 Dokumentasi Endpoint API
 
-**Base URL:** `{{baseUrl}}/api/v1`
-
-All protected endpoints require a Bearer Token in the Authorization header:
+**Base URL:** `http://localhost:8000/api/v1`  
+Semua endpoint terproteksi memerlukan header:
+```http
+Authorization: Bearer <your_access_token>
+Accept: application/json
 ```
-Authorization: Bearer <your_token>
-```
 
----
-
-### Authentication
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/auth/login` | Public | Login and get access token |
-| `POST` | `/auth/register` | Public | Register a new user |
-| `POST` | `/auth/logout` | 🔒 Protected | Revoke current token |
-| `GET` | `/auth/me` | 🔒 Protected | Get authenticated user profile |
-
-**Login Request:**
+### Format Standar Respon (Envelope Pattern)
 ```json
 {
-  "email": "admin@procurement.app",
+  "meta": {
+    "code": 200,
+    "status": "success",
+    "message": "Data request retrieved."
+  },
+  "result": { ... }
+}
+```
+
+---
+
+### 1. Autentikasi (`/auth`)
+
+| Metode | Endpoint | Akses | Keterangan |
+|---|---|---|---|
+| `POST` | `/auth/login` | Publik | Autentikasi kredensial & penerbitan Bearer Token |
+| `POST` | `/auth/register` | Publik | Pendaftaran pengguna baru |
+| `POST` | `/auth/logout` | 🔒 Terautentikasi | Pencabutan token sesi aktif |
+| `GET` | `/auth/me` | 🔒 Terautentikasi | Profil akun yang sedang login beserta data departemen |
+
+<details>
+<summary><b>Contoh Request & Response Login</b></summary>
+
+**Payload Request:**
+```json
+{
+  "email": "employee@procurement.app",
   "password": "password"
 }
 ```
 
-**Register Request:**
+**Respon Sukses (200 OK):**
 ```json
 {
-  "name": "Azzasafah Procurement",
-  "email": "azzasafah@procurement.app",
-  "password": "password123",
-  "password_confirmation": "password123",
-  "department_id": "019e1304-e3c3-731d-b5c2-2a2c1be46252",
-  "phone": "081234567890"
+  "meta": {
+    "code": 200,
+    "status": "success",
+    "message": "login berhasil"
+  },
+  "result": {
+    "access_token": "1|qXy...random_sanctum_token...",
+    "token_type": "Bearer",
+    "user": {
+      "id": "019e1304-e3c3-731d-b5c2-2a2c1be46252",
+      "name": "Budi Santoso",
+      "email": "employee@procurement.app",
+      "role": "employee",
+      "department": {
+        "id": "019e1304-e3c0-731d-b5c2-2a2c1be46251",
+        "name": "Finance",
+        "code": "FIN"
+      }
+    }
+  }
 }
 ```
+</details>
 
 ---
 
-### Users
+### 2. Permohonan Pengadaan (`/requests`)
 
-> 🔒 All endpoints require authentication. Admin-only endpoints are marked with `[Admin]`.
-
-| Method | Endpoint | Access | Description |
+| Metode | Endpoint | Akses | Keterangan |
 |---|---|---|---|
-| `GET` | `/users` | 🔒 Admin | Get all users |
-| `GET` | `/users/{id}` | 🔒 Admin | Get user by ID |
-| `POST` | `/users` | 🔒 Admin | Create new user |
-| `PUT` | `/users/{id}` | 🔒 Admin | Update user data |
-| `PATCH` | `/users/{id}/role` | 🔒 Admin | Update user role only |
-| `DELETE` | `/users/{id}` | 🔒 Admin | Delete user |
+| `GET` | `/requests` | 🔒 Terautentikasi | Daftar pengadaan (disaring otomatis per peran & query filter) |
+| `POST` | `/requests` | 🔒 Terautentikasi | Pembuatan draf pengadaan baru beserta daftar item (*batch*) |
+| `PUT` | `/requests/{id}` | 🔒 Terautentikasi | Pembaharuan catatan pengadaan (hanya status `DRAFT`) |
+| `DELETE` | `/requests/{id}` | 🔒 Terautentikasi | Pembatalan draf (hanya status `DRAFT`) |
+| `PUT` | `/requests/{id}/submit` | 🔒 Terautentikasi | Mengajukan draf untuk ditinjau (`DRAFT` → `SUBMITTED`) |
+| `PUT` | `/requests/{id}/approve` | 🔒 Manager, Admin | Menyetujui pengadaan (`SUBMITTED` → `APPROVED`) |
+| `PUT` | `/requests/{id}/reject` | 🔒 Manager, Admin | Menolak pengadaan beserta alasan penolakan |
+| `PUT` | `/requests/{id}/procure` | 🔒 Purchasing, Admin | Menerbitkan PO ke vendor (`APPROVED` → `IN_PROCUREMENT`) |
+| `PUT` | `/requests/{id}/complete`| 🔒 Purchasing, Admin | Menutup pengadaan (`IN_PROCUREMENT` → `COMPLETED`) |
 
-**Create User Request:**
+<details>
+<summary><b>Contoh Payload Pembuatan Pengadaan Multi-Item</b></summary>
+
 ```json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "department_id": "019e1304-e3c8-7270-afc8-88d9c648283d",
-  "role": "employee",
-  "phone": "081234567890",
-  "is_active": true
-}
-```
-
-**Available Roles:** `admin`, `manager`, `employee`
-
----
-
-### Departments
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/departments` | 🔒 Protected | Get all departments |
-| `GET` | `/departments/{id}` | 🔒 Protected | Get department by ID |
-| `POST` | `/departments` | 🔒 Admin | Create department |
-| `PUT` | `/departments/{id}` | 🔒 Admin | Update department |
-| `DELETE` | `/departments/{id}` | 🔒 Admin | Delete department |
-
-**Create Department Request:**
-```json
-{
-  "name": "Research and Development",
-  "code": "RND",
-  "description": "Departemen Research and Development"
-}
-```
-
----
-
-### Vendors
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/vendors` | 🔒 Protected | Get all vendors |
-| `GET` | `/vendors/{id}` | 🔒 Protected | Get vendor by ID |
-| `POST` | `/vendors` | 🔒 Admin | Create vendor |
-| `PUT` | `/vendors/{id}` | 🔒 Admin | Update vendor |
-| `DELETE` | `/vendors/{id}` | 🔒 Admin | Delete vendor |
-
-**Create Vendor Request:**
-```json
-{
-  "name": "PT Sumber Teknologi Nusantara",
-  "code": "STN-001",
-  "contact_person": "Andi Pratama",
-  "email": "vendor@stn.co.id",
-  "phone": "081234567890",
-  "address": "Jl. Industri Raya No. 88, Surabaya",
-  "category": "Electronics",
-  "is_active": true,
-  "notes": "Vendor pengadaan perangkat IT dan operasional kantor"
-}
-```
-
----
-
-### Stocks
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/stocks` | 🔒 Protected | Get all stock items |
-| `GET` | `/stocks/{id}` | 🔒 Protected | Get stock item by ID |
-| `POST` | `/stocks` | 🔒 Admin | Create stock item |
-| `PUT` | `/stocks/{id}` | 🔒 Admin | Update stock item |
-| `POST` | `/stocks/check` | 🔒 Protected | Check stock availability |
-
-**Create Stock Request:**
-```json
-{
-  "item_name": "Laptop ASUS ExpertBook",
-  "category": "Electronics",
-  "quantity": 25,
-  "unit": "pcs",
-  "location": "Warehouse A - Rack 3",
-  "minimum_stock": 5
-}
-```
-
-**Check Stock Request:**
-```json
-{
-  "item_name": "Laptop ASUS ExpertBook",
-  "quantity": 5
-}
-```
-
----
-
-### Procurement Requests
-
-> Core module — manages the full lifecycle of a procurement request.
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/requests` | 🔒 Protected | Get all requests (role-filtered) |
-| `POST` | `/requests` | 🔒 Protected | Create new procurement request |
-| `PUT` | `/requests/{id}` | 🔒 Protected | Update request notes |
-| `PUT` | `/requests/{id}/submit` | 🔒 Protected | Submit request for approval |
-| `PUT` | `/requests/{id}/approve` | 🔒 Manager/Admin | Approve a request |
-| `PUT` | `/requests/{id}/reject` | 🔒 Manager/Admin | Reject a request |
-| `PUT` | `/requests/{id}/procure` | 🔒 Admin | Mark as procured (assign vendor) |
-| `PUT` | `/requests/{id}/complete` | 🔒 Admin | Mark as completed |
-| `DELETE` | `/requests/{id}` | 🔒 Protected | Delete draft request |
-
-**Create Request Body:**
-```json
-{
-  "notes": "Pengadaan perangkat untuk tim finansial",
+  "notes": "Pengadaan suku cadang perangkat telekomunikasi navigasi darurat",
   "items": [
     {
-      "item_name": "Laptop ASUS ExpertBook",
+      "item_name": "Switch Cisco Catalyst 24-Port",
       "category": "Electronics",
-      "quantity": 4,
-      "unit": "pcs",
-      "estimated_price": 12500000,
-      "notes": "Untuk staff finance dan accounting"
-    },
-    {
-      "item_name": "Printer Epson EcoTank L5290",
-      "category": "Office Equipment",
       "quantity": 2,
       "unit": "unit",
-      "estimated_price": 3500000,
-      "notes": "Printer kantor divisi keuangan"
+      "estimated_price": 18500000,
+      "notes": "Spesifikasi rackmount untuk data center cabang"
+    },
+    {
+      "item_name": "Kabel UTP Cat6 305m",
+      "category": "Office Equipment",
+      "quantity": 3,
+      "unit": "roll",
+      "estimated_price": 1750000,
+      "notes": "Roll kabel bersertifikat ISO"
     }
   ]
 }
 ```
+</details>
 
-**Procure Request Body:**
+<details>
+<summary><b>Contoh Payload Penerbitan Purchase Order (Procure)</b></summary>
+
 ```json
 {
   "vendor_id": "019e1304-e7ba-73a2-820d-693700020831",
-  "expected_delivery_date": "2026-05-25",
-  "total_amount": 62300000,
-  "notes": "Pengadaan perangkat operasional untuk tim finansial"
+  "expected_delivery_date": "2026-06-15",
+  "total_amount": 42250000,
+  "notes": "Pengiriman langsung ke Workshop Logistik Bagian Barat"
 }
 ```
+</details>
 
 ---
 
-### Orders (Procures)
+### 3. Purchase Order & Logistik (`/procures`)
 
-| Method | Endpoint | Access | Description |
+| Metode | Endpoint | Akses | Keterangan |
 |---|---|---|---|
-| `GET` | `/procures` | 🔒 Admin | Get all procurement orders |
-| `PUT` | `/procures/{id}/deliver` | 🔒 Admin | Mark order as delivered |
+| `GET` | `/procures` | 🔒 Purchasing, Admin | Melihat seluruh Purchase Order beserta vendor & status |
+| `PUT` | `/procures/{id}/deliver` | 🔒 Purchasing, Admin | Konfirmasi penerimaan barang & otomasi penutupan request |
 
 ---
 
-### Reports
+### 4. Manajemen Stok & Pergudangan (`/stocks`)
 
-| Method | Endpoint | Access | Description |
+| Metode | Endpoint | Akses | Keterangan |
 |---|---|---|---|
-| `GET` | `/reports/summary` | 🔒 Admin | Overall procurement summary (KPIs) |
-| `GET` | `/reports/category-per-month` | 🔒 Admin | Requests breakdown by category per month |
-| `GET` | `/reports/average-lead-time` | 🔒 Admin | Average lead time from request to delivery |
+| `GET` | `/stocks` | 🔒 Terautentikasi | Katalog stok barang dengan filter kategori & nama |
+| `GET` | `/stocks/{id}` | 🔒 Terautentikasi | Detail stok item |
+| `POST` | `/stocks` | 🔒 Warehouse, Admin | Registrasi material/stok baru |
+| `PUT` | `/stocks/{id}` | 🔒 Warehouse, Admin | Penyesuaian informasi/jumlah stok |
+| `POST` | `/stocks/check` | 🔒 Terautentikasi | Validasi ketersediaan barang dengan *Pessimistic Lock* |
 
 ---
 
-## 🔐 Role & Access Control
+### 5. Mitra Rekanan / Vendor (`/vendors`)
 
-| Feature | Employee | Manager | Admin |
-|---|:---:|:---:|:---:|
-| Login / View Profile | ✅ | ✅ | ✅ |
-| Create Request | ✅ | ✅ | ✅ |
-| Submit Own Request | ✅ | ✅ | ✅ |
-| Approve / Reject Request | ❌ | ✅ | ✅ |
-| Manage Users | ❌ | ❌ | ✅ |
-| Manage Vendors | ❌ | ❌ | ✅ |
-| Manage Departments | ❌ | ❌ | ✅ |
-| Manage Stocks | ❌ | ❌ | ✅ |
-| Procure / Complete Request | ❌ | ❌ | ✅ |
-| View Reports | ❌ | ❌ | ✅ |
+| Metode | Endpoint | Akses | Keterangan |
+|---|---|---|---|
+| `GET` | `/vendors` | 🔒 Terautentikasi | Daftar vendor berstatus aktif beserta kategori layanan |
+| `GET` | `/vendors/{id}` | 🔒 Terautentikasi | Rincian profil rekanan |
+| `POST` | `/vendors` | 🔒 Purchasing, Admin | Registrasi vendor rekanan baru |
+| `PUT` | `/vendors/{id}` | 🔒 Purchasing, Admin | Update legalitas/kontak vendor |
+| `DELETE` | `/vendors/{id}` | 🔒 Purchasing, Admin | Nonaktifkan / hapus vendor |
 
 ---
 
-## 🔄 Procurement Flow
+### 6. Departemen & Organisasi (`/departments`)
+
+| Metode | Endpoint | Akses | Keterangan |
+|---|---|---|---|
+| `GET` | `/departments` | 🔒 Terautentikasi | Daftar departemen beserta relasi pengguna |
+| `GET` | `/departments/{id}` | 🔒 Terautentikasi | Detail unit departemen |
+| `POST` | `/departments` | 🔒 Admin | Tambah struktur departemen baru |
+| `PUT` | `/departments/{id}` | 🔒 Admin | Edit kode atau nama departemen |
+| `DELETE` | `/departments/{id}` | 🔒 Admin | Hapus departemen |
+
+---
+
+### 7. Manajemen Pengguna (`/users`)
+
+| Metode | Endpoint | Akses | Keterangan |
+|---|---|---|---|
+| `GET` | `/users` | 🔒 Admin | Daftar seluruh karyawan & hak akses |
+| `GET` | `/users/{id}` | 🔒 Admin | Detail spesifik karyawan |
+| `POST` | `/users` | 🔒 Admin | Pembuatan akun baru dengan penetapan role |
+| `PUT` | `/users/{id}` | 🔒 Admin | Modifikasi profil karyawan (dilindungi dari modifikasi akun sendiri) |
+| `PATCH` | `/users/{id}/role` | 🔒 Admin | Mengubah role jabatan |
+| `DELETE` | `/users/{id}` | 🔒 Admin | Hapus pengguna & cabut seluruh token aktif |
+
+---
+
+### 8. Laporan & Intelijen Bisnis (`/reports`)
+
+| Metode | Endpoint | Akses | Keterangan |
+|---|---|---|---|
+| `GET` | `/reports/summary` | 🔒 Manager, Admin | Ringkasan metrik eksekutif (total permohonan, antrean approval, vendor aktif) |
+| `GET` | `/reports/top-departments` | 🔒 Manager, Admin | 5 departemen dengan pengajuan terbanyak dalam 3 bulan terakhir |
+| `GET` | `/reports/category-per-month` | 🔒 Manager, Admin | Distribusi volume dan frekuensi belanja per kategori per bulan |
+| `GET` | `/reports/average-lead-time` | 🔒 Manager, Admin | Metrik SLA rata-rata, tercepat, dan terlama pengadaan (hari) |
+
+---
+
+## 🗄️ Relasi Basis Data & Integritas Skema
 
 ```
-[Employee]           [Manager/Admin]         [Admin]
-    │                      │                    │
-    ▼                      │                    │
- Create Request             │                    │
- (status: draft)            │                    │
-    │                      │                    │
-    ▼                      │                    │
- Submit Request             │                    │
- (status: submitted)        │                    │
-    │                      │                    │
-    └──────────────────────▶│                    │
-                       Approve / Reject          │
-                  (status: approved/rejected)    │
-                            │                    │
-                            └───────────────────▶│
-                                           Procure
-                                     (assign vendor,
-                                   status: procured)
-                                                 │
-                                                 ▼
-                                          Deliver / Complete
-                                        (status: completed)
+[departments] ──< [users] ──< [requests] ──< [request_items]
+                             ├──< [approvals]
+                             ├──< [status_histories] (Immutable Log)
+                             └──< [procurement_orders] >── [vendors]
+[stocks]
 ```
 
----
-
-## 👤 Author
-
-**Muhammad Hafizh Azzasafah**
-
-- 📧 muhammad.hafizh0408@gmail.com
+* **Foreign Key Constraints**: Menggunakan aturan `restrictOnDelete()` pada seluruh relasi inti untuk mencegah hilangnya riwayat historis pengadaan jika entitas master dihapus secara tidak sengaja.
+* **Soft Deletes**: Diterapkan pada data transaksional (`requests`, `request_items`, `procurement_orders`) agar pemulihan data dan penelusuran audit tetap terjaga.
+* **Compound Indexing**: Index dipasang pada kolom filter yang sering diakses (`status`, `requester_id`, `department_id`, `created_at`).
 
 ---
+
+## 🚀 Panduan Instalasi & Eksekusi Lokal
+
+### Prasyarat Lingkungan
+* **PHP** >= 8.2 (dengan ekstensi `pdo_mysql`, `openssl`, `mbstring`, `curl`)
+* **Composer** >= 2.x
+* **MySQL** >= 8.0
+* **Git**
+
+### Langkah-Langkah Setup
+
+```bash
+# 1. Kloning repository
+git clone https://github.com/Azzasafah/procurement-api.git
+cd procurement-api
+
+# 2. Instal dependensi PHP via Composer
+composer install
+
+# 3. Siapkan file konfigurasi lingkungan
+cp .env.example .env
+
+# 4. Generate Application Encryption Key
+php artisan key:generate
+
+# 5. Konfigurasi kredensial basis data pada file .env
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=procurement_db
+# DB_USERNAME=root
+# DB_PASSWORD=your_password
+
+# 6. Jalankan migrasi tabel
+php artisan migrate
+
+# 7. Isi data awal (departemen, akun multi-role, vendor sampel, stok awal)
+php artisan db:seed
+
+# 8. Hubungkan storage symlink (jika menggunakan fitur foto profil)
+php artisan storage:link
+
+# 9. Jalankan server lokal
+php artisan serve
+```
+
+Server API akan aktif dan siap menerima request pada: `http://localhost:8000`.
+
+---
+
+## 👥 Akun Simulasi & Pengujian Bawaan (Seeders)
+
+Semua akun pengujian di bawah ini dibuat otomatis saat menjalankan `php artisan db:seed` dengan kata sandi universal: `password`.
+
+| Peran | Nama Pengguna | Alamat Email | Departemen | Lingkup Tugas Pengujian |
+|---|---|---|---|---|
+| **Admin** | Admin System | `admin@procurement.app` | Information Technology | Manajemen pengguna, role, dan konfigurasi master |
+| **Employee** | Budi Santoso | `employee@procurement.app` | Finance | Pengajuan draf kebutuhan barang operasional kantor |
+| **Manager** | Andi Wijaya | `manager@procurement.app` | Information Technology | Verifikasi & persetujuan/penolakan permohonan divisi |
+| **Purchasing** | Siti Rahayu | `purchasing@procurement.app` | Information Technology | Negosiasi vendor, penerbitan PO, dan penyelesaian order |
+| **Warehouse** | Dewi Lestari | `warehouse@procurement.app` | Operations | Validasi kuantitas stok gudang & penerimaan material |
+
+---
+
+## 🧪 Koleksi Pengujian API (Postman)
+
+Koleksi Postman siap pakai telah disediakan untuk mempermudah evaluasi pengujian menyeluruh:
+* Menguji alur otorisasi *Bearer Token*.
+* Menguji siklus hidup lengkap pengadaan dari status *Draft* hingga *Completed*.
+* Menguji skenario negatif (*Unauthorized access*, *Invalid status transitions*, *Forbidden role actions*).
+
+---
+
+## 👨‍💻 Profil Pengembang
+
+**Muhammad Hafizh Azzasafah**  
+*Fullstack & Backend Engineer*  
+- 💼 LinkedIn: [linkedin.com/in/muhammad-hafizh-azzasafah](https://www.linkedin.com/in/muhammad-hafizh-azzasafah/)
+- 🐙 GitHub: [github.com/Azzasafah](https://github.com/Azzasafah)
+- 📧 Email: [muhammad.hafizh0408@gmail.com](mailto:muhammad.hafizh0408@gmail.com)
+
+---
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah lisensi terbuka [MIT License](LICENSE).

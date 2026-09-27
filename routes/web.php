@@ -2,3 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return response()->json([
+        'app' => config('app.name', 'Procurement API'),
+        'version' => '1.0.0',
+        'status' => 'operational',
+        'api_docs' => '/api/v1'
+    ]);
+});

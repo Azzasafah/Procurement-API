@@ -8,113 +8,95 @@ use App\Http\Controllers\API\RequestController;
 use App\Http\Controllers\API\StockController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VendorController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes - Procurement System v1
+|--------------------------------------------------------------------------
+*/
 
 Route::prefix('v1')->group(function () {
 
-    // health
-    Route::get('/health', function () {
-        return response()->json([
-            'success' => true,
-            'message' => 'Server is running'
-        ]);
-    });
-
-    // public route
+    // Public Authentication Endpoints
     Route::prefix('auth')->group(function () {
-        Route::post('login',    [AuthController::class, 'login']);
-        Route::post('register', [AuthController::class, 'register']);
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
     });
 
-    //protected route
+    // Authenticated Endpoints
     Route::middleware('auth:sanctum')->group(function () {
-        // Auth (self-service)
+
+        // Auth Profile & Session
         Route::prefix('auth')->group(function () {
-            Route::post('logout', [AuthController::class, 'logout']);
-            Route::get('me',        [AuthController::class, 'me']);
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
         });
 
-        // user management (admin only)
-        Route::middleware('role:admin')->prefix('users')->group(function () {
-            Route::get('/',             [UserController::class, 'index']);
-            Route::get('/{id}',         [UserController::class, 'show']);
-            Route::patch('/{id}/role',  [UserController::class, 'updateRole']);
-            Route::post('/',            [UserController::class, 'store']);
-            Route::put('/{id}',         [UserController::class, 'update']);
-            Route::delete('/{id}',      [UserController::class, 'destroy']);
+        // User Management (Admin Only)
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/users', [UserController::class, 'index']);
+            Route::get('/users/{id}', [UserController::class, 'show']);
+            Route::post('/users', [UserController::class, 'store']);
+            Route::put('/users/{id}', [UserController::class, 'update']);
+            Route::patch('/users/{id}/role', [UserController::class, 'updateRole']);
+            Route::delete('/users/{id}', [UserController::class, 'destroy']);
         });
 
-        // department management
-        Route::prefix('departments')->group(function () {
-            Route::get('/',         [DepartmentController::class, 'index']);
-            Route::get('/{id}',     [DepartmentController::class, 'show']);
-            Route::middleware('role:admin, manager')->group(function () {
-                Route::post('/',    [DepartmentController::class, 'store']);
-                Route::put('/{id}', [DepartmentController::class, 'update']);
-                Route::delete('/{id}',  [DepartmentController::class, 'delete']);
-            });
+        // Department Management
+        Route::get('/departments', [DepartmentController::class, 'index']);
+        Route::get('/departments/{id}', [DepartmentController::class, 'show']);
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/departments', [DepartmentController::class, 'store']);
+            Route::put('/departments/{id}', [DepartmentController::class, 'update']);
+            Route::delete('/departments/{id}', [DepartmentController::class, 'delete']);
         });
 
-        // request management
-        Route::prefix('requests')->group(function () {
-            Route::get('/',        [RequestController::class, 'index']);
-            Route::post('/',       [RequestController::class, 'store']);
-            Route::put('/{id}',    [RequestController::class, 'update']);
-            Route::delete('/{id}', [RequestController::class, 'destroy'])
-                ->middleware('role:admin');
-            // State transition
-            Route::put('/{id}',    [RequestController::class, 'submit']);
-            Route::middleware('role:manager, admin')->group(function () {
-                Route::put('/{id}/approve', [RequestController::class, 'approve']);
-                Route::put('/{id}/reject',  [RequestController::class, 'reject']);
-            });
-
-            Route::middleware('role:purchasing, admin')->group(function () {
-                Route::put('/{id}/procure', [RequestController::class, 'procure']);
-                Route::put('/{id}/complete', [RequestController::class, 'complete']);
-            });
+        // Vendor Management
+        Route::get('/vendors', [VendorController::class, 'index']);
+        Route::get('/vendors/{id}', [VendorController::class, 'show']);
+        Route::middleware('role:admin,purchasing')->group(function () {
+            Route::post('/vendors', [VendorController::class, 'store']);
+            Route::put('/vendors/{id}', [VendorController::class, 'update']);
+            Route::delete('/vendors/{id}', [VendorController::class, 'destroy']);
         });
 
-        // procure management
-        Route::prefix('procures')->group(function () {
-            Route::get('/',        [ProcurementController::class, 'index']);
-            // State transition
-            Route::middleware('role:purchasing, admin')->group(function () {
-                Route::put('/{id}/deliver', [ProcurementController::class, 'deliver']);
-            });
+        // Stock & Inventory Management
+        Route::get('/stocks', [StockController::class, 'index']);
+        Route::get('/stocks/{id}', [StockController::class, 'show']);
+        Route::post('/stocks/check', [StockController::class, 'check']);
+        Route::middleware('role:admin,warehouse')->group(function () {
+            Route::post('/stocks', [StockController::class, 'store']);
+            Route::put('/stocks/{id}', [StockController::class, 'update']);
         });
 
-        // vendor management
-        Route::prefix('vendors')->group(function () {
-            Route::get('/',        [VendorController::class, 'index']);
-            Route::get('/{id}',    [VendorController::class, 'show']);
+        // Procurement Requests Lifecycle
+        Route::get('/requests', [RequestController::class, 'index']);
+        Route::post('/requests', [RequestController::class, 'store']);
+        Route::put('/requests/{id}', [RequestController::class, 'update']);
+        Route::delete('/requests/{id}', [RequestController::class, 'destroy']);
+        Route::put('/requests/{id}/submit', [RequestController::class, 'submit']);
 
-            Route::middleware('role:purchasing,admin')->group(function () {
-                Route::post('/',       [VendorController::class, 'store']);
-                Route::put('/{id}',    [VendorController::class, 'update']);
-                Route::delete('/{id}', [VendorController::class, 'destroy']);
-            });
+        // Approvals (Manager & Admin)
+        Route::middleware('role:manager,admin')->group(function () {
+            Route::put('/requests/{id}/approve', [RequestController::class, 'approve']);
+            Route::put('/requests/{id}/reject', [RequestController::class, 'reject']);
         });
 
-        // stock management
-        Route::prefix('stocks')->group(function () {
-            Route::get('/',        [StockController::class, 'index']);
-            Route::get('/{id}',    [StockController::class, 'show']);
-            Route::post('/check',  [StockController::class, 'check']);
-
-            Route::middleware('role:warehouse,admin')->group(function () {
-                Route::post('/',    [StockController::class, 'store']);
-                Route::put('/{id}', [StockController::class, 'update']);
-            });
+        // Purchasing & Fulfillment (Purchasing & Admin)
+        Route::middleware('role:purchasing,admin')->group(function () {
+            Route::put('/requests/{id}/procure', [RequestController::class, 'procure']);
+            Route::put('/requests/{id}/complete', [RequestController::class, 'complete']);
+            Route::get('/procures', [ProcurementController::class, 'index']);
+            Route::put('/procures/{id}/deliver', [ProcurementController::class, 'deliver']);
         });
 
-        // report
-        Route::middleware('role:manager,admin')->prefix('reports')->group(function () {
-            Route::get('summary',            [ReportController::class, 'summary']);
-            Route::get('top-departments',    [ReportController::class, 'topDepartments']);
-            Route::get('category-per-month', [ReportController::class, 'categoryPerMonth']);
-            Route::get('average-lead-time',  [ReportController::class, 'averageLeadTime']);
+        // Analytics & Reports (Admin & Manager)
+        Route::middleware('role:admin,manager')->prefix('reports')->group(function () {
+            Route::get('/summary', [ReportController::class, 'summary']);
+            Route::get('/top-departments', [ReportController::class, 'topDepartments']);
+            Route::get('/category-per-month', [ReportController::class, 'categoryPerMonth']);
+            Route::get('/average-lead-time', [ReportController::class, 'averageLeadTime']);
         });
     });
 });
