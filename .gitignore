@@ -22,3 +22,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Agent & AI Customizations
+/.agents/
+skills-lock.json
+AGENTS.md
+DESIGN.md
